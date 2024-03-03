@@ -1,4 +1,4 @@
-# Renard — Votre vie scolaire
+# Renard — Votre vie scolaire ablabla
 
 > [!WARNING]  
 > **Des modifications majeures de la structure de ce projet sont en cours**
