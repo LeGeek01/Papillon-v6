@@ -19,6 +19,7 @@ import { useAppContext } from '../utils/AppContext';
 import NativeList from '../components/NativeList';
 import NativeItem from '../components/NativeItem';
 import NativeText from '../components/NativeText';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const lz = (n: number) => (n < 10 ? `0${n}` : n);
 const getObservationIcon = (type: PapillonObservationType): JSX.Element => {
@@ -58,6 +59,7 @@ function SchoolLifeScreen({ navigation }: {
   const [developRetard, setDevelopRetard] = useState(false)
   const [developPunitions, setDevelopPunitions] = useState(false)
   const [developObservations, setDevelopObservations] = useState(false)
+  const [service, setService] = useState<string>()
 
   const retrieveData = async (force = false) => {
     try {
@@ -73,12 +75,21 @@ function SchoolLifeScreen({ navigation }: {
       });
 
       setVieScolaire(value);
-      const total = value.absences.reduce((total, absence) => {
-        const hours = parseInt(absence.hours.split('h')[0]);
-        const minutes = parseInt(absence.hours.split('h')[1]);
-        return total + hours + minutes / 60;
-      }, 0);
-      setTotalHoursMissed(total);
+      console.log(JSON.stringify(value.absences[0]))
+      console.log(new Date(value.absences[0].to - value.absences[0].from).getHours())
+      if(value.absences[0]?.hours.includes("demi-journées")) {
+        let total = 0;
+        value.absences.forEach(abs => {
+          total = total + (parseInt(abs.hours.split(" ")[0]))
+        })
+        setTotalHoursMissed(total)
+      }
+      let total = 0
+      value.absences.forEach(abs => {
+        let duration = new Date(abs.to - abs.from)
+        total = total + duration.getHours() + (duration.getMinutes() / 60)
+      })
+      setTotalHoursMissed(total)
       const totalDelay = value.delays.reduce((total, delay) => {
         return total + delay.duration;
       }, 0);
@@ -91,7 +102,10 @@ function SchoolLifeScreen({ navigation }: {
   };
 
   useEffect(() => {
-    retrieveData(false);
+    AsyncStorage.getItem("service").then((s) => {
+      setService(String(s));
+      retrieveData(false);
+    })
   }, [appContext.dataProvider]);
 
   useLayoutEffect(() => {
@@ -139,7 +153,7 @@ function SchoolLifeScreen({ navigation }: {
           })}
         </NativeText>
         <NativeText heading="p2">
-          {absence.hours.split('h')[0]}h{lz(parseInt(absence.hours.split('h')[1]))} manquées
+          { absence.hours.includes("h") ? `${absence.hours.split('h')[0]}h${lz(parseInt(absence.hours.split('h')[1]))}` : absence.hours } manquées
         </NativeText>
         {
           // if from and to is same day :
