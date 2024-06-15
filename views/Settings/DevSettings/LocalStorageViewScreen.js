@@ -291,7 +291,7 @@ function changeEditHandler(name, value, type) {
   let entryUserOptions = storageList;
   if(type === 'value') entryUserOptions[name] = { edit: true, editValue: value, editName: entryUserOptions[name].editName };
   if(type === 'name') entryUserOptions[name] = { edit: true, editValue: entryUserOptions[name].editValue, editName: value };
-  setStorageList(entryUserOptions);
+  storageList = entryUserOptions
 }
 function validateEdit(name) {
   Alert.alert(
