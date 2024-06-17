@@ -26,10 +26,9 @@ function App() {
 
   useEffect(() => {
     const prepare = async () => {
+      const serviceName = await AsyncStorage.getItem('service');
       try {
         await loadFonts();
-
-        const serviceName = await AsyncStorage.getItem('service');
 
         if (!serviceName) {
           setLoading(false);
@@ -49,8 +48,9 @@ function App() {
 
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        console.error("loading error", error);
         setLoading(false);
+        if(serviceName) setLoggedIn(true)
       }
     };
 
