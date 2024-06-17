@@ -40,7 +40,7 @@ export const loadPronoteConnector = async (): Promise<Pronote | null> => {
   if (!token || isNaN(accountTypeID) || !instanceURL || !username || !uuid) {
     console.warn('loadPronoteConnector: information are outdated, logging out...');
     await removePronoteConnector();
-    return null;
+    throw new Error("Informations are outdated, logging out...");
   }
 
   try {
@@ -64,8 +64,7 @@ export const loadPronoteConnector = async (): Promise<Pronote | null> => {
   catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('Failed to extract session from HTML')) {
-        await removePronoteConnector();
-        return null;
+        throw new Error("Failed to extract session from HTML")
       }
 
       if (error instanceof PawnoteNetworkFail) { // (subclass of Error)
