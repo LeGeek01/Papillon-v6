@@ -60,6 +60,8 @@ import {
   X,
   MapPin,
   Settings,
+  ServerOff,
+  ServerOffIcon,
 } from 'lucide-react-native';
 
 import { useTheme, Text } from 'react-native-paper';
@@ -76,6 +78,7 @@ import {
 import { GetRessource } from '../utils/GetRessources/GetRessources';
 import { PapillonGroupedHomeworks } from '../fetch/types/homework';
 import { BlurView } from 'expo-blur';
+import NativeItem from '../components/NativeItem';
 
 const openURL = async (url: string) => {
   await WebBrowser.openBrowserAsync(url);
@@ -204,7 +207,7 @@ const HomeScreen = ({ navigation }) => {
 
   // Récupère le prochain cours et son heure de début à partir du hook useRealTimeCourse
   const { nextCourse, nextCourseStartTime } = useRealTimeCourse(lessons);
-
+  const [connectError, setConnectError] = useState<boolean>(false)
   // Effectue le chargement des données de l'utilisateur et des cours lors du montage du composant
   useEffect(() => {
     const fetchData = async () => {
@@ -537,7 +540,29 @@ style={{
             </PressableScale>
           </Animated.View>
         )}
-
+        {
+          true && (
+            <Animated.View
+              entering={ZoomIn}
+              exiting={ZoomOut}
+              layout={LinearTransition}
+            >
+              <NativeItem 
+                style={{
+                  ...styles.tabsTabsContainer,
+                  borderColor: '#E1462300',
+                }}
+                backgroundColor="#E1462322"
+                leading={(
+                  <ServerOff size={24} color={UIColors.text} />
+                )}
+              >
+                <NativeText heading='b'>Échec de la connexion à votre service scolaire</NativeText>
+                <NativeText>Vérifiez votre connexion. Si le problème persiste, vous avez probablement été déconnecté.</NativeText>
+              </NativeItem>
+            </Animated.View>
+          )
+        }
         <Animated.View
           layout={LinearTransition}
         >
