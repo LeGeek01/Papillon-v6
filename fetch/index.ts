@@ -39,6 +39,7 @@ import type { cloudResFolder } from '@papillonapp/ed-core/dist/src/types/v3';
 
 
 import { Alert } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 
 export type ServiceName = 'pronote' | 'skolengo' | 'ecoledirecte';
 
@@ -291,13 +292,24 @@ export class IndexDataInstance {
       // user = await this.skolengoInstance.getUser(force);
     }
     else if (this.service === 'pronote') {
-      user = await pronoteUserHandler(this.pronoteInstance, force);
+      user = await pronoteUserHandler(this.pronoteInstance, force)
+      .catch(err => {
+        console.error("failed to connect to pronote", err)
+      })
     } else if(this.service === 'ecoledirecte') {
       user = await EcoleDirecteUser(this.ecoledirecteInstance, force);
     }
     
     if (!user) {
-      throw Alert.alert('Aucun cache n\'a été trouvé, il se peut que vous ayez été déconnecté de votre session.');
+      showMessage({
+        message: "Échec de la connexion à votre service scolaire.",
+        description: "Vérifiez votre connexion. Autrement, il se peut que vous ayez été déconnecté.",
+        type: "danger",
+        icon: "auto",
+        floating: true,
+        duration: 10000
+      })
+      throw new Error("Connection to school service failed");
     }
 
     return runUserMiddleware(user);
