@@ -18,7 +18,7 @@ interface UIColors {
   borderLight: string;
 }
 
-function useUIColors(schemeForce: string | undefined, platformForce: string | undefined): UIColors {
+function useUIColors(schemeForce?: string, platformForce?: string): UIColors {
   const theme = useTheme();
   const scheme = useColorScheme();
 
