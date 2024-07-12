@@ -6,7 +6,7 @@ import { dateToFrenchFormat } from '../../utils/dates';
 import type { CachedPapillonTimetable, PapillonLesson } from '../types/timetable';
 import type { PapillonAttachmentType } from '../types/attachment';
 
-export const timetableHandler = async (interval: [from: Date, to?: Date], instance?: Pronote, force = false): Promise<PapillonLesson[] | null> => {
+export const timetableHandler = async (interval: [from: Date, to?: Date], instance?: Pronote, force = false, includeContent: Boolean = true): Promise<PapillonLesson[] | null> => {
   const from = dateToFrenchFormat(interval[0]);
   const to = interval[1] ? dateToFrenchFormat(interval[1]) : void 0;
 
@@ -42,20 +42,22 @@ export const timetableHandler = async (interval: [from: Date, to?: Date], instan
           // We consider personal as teachers also here (for compatibility).
           ...currentClass.personalNames
         ];
-
-        const resource = await currentClass.getResource();
         const contents: PapillonLesson['contents'] = [];
-        if (resource) {
-          for (const resourceContent of resource.contents) {
-            contents.push({
-              description: resourceContent.description,
-              title: resourceContent.title,
-              files: resourceContent.files.map(file => ({
-                name: file.name,
-                type: file.type as unknown as PapillonAttachmentType,
-                url: file.url
-              }))
-            });
+
+        if(includeContent) {
+          const resource = await currentClass.getResource();
+          if (resource) {
+            for (const resourceContent of resource.contents) {
+              contents.push({
+                description: resourceContent.description,
+                title: resourceContent.title,
+                files: resourceContent.files.map(file => ({
+                  name: file.name,
+                  type: file.type as unknown as PapillonAttachmentType,
+                  url: file.url
+                }))
+              });
+            }
           }
         }
 
@@ -124,11 +126,12 @@ export const timetableHandler = async (interval: [from: Date, to?: Date], instan
     return timetable;
   }
   catch (error) {
-    if (!cache) return null;
+    console.error(`[pronote/timetableHandler]: ${error}`)
+    if (!cache) throw error;
     const data: Array<CachedPapillonTimetable> = JSON.parse(cache);
 
     const cached = data.find(cached => cached.interval.from === from && cached.interval.to === to);
-    if (!cached) return null;
+    if (!cached) throw error;
 
     console.info('[pronote/timetableHandler]: network failed, recover with cache');
     return cached.timetable;
