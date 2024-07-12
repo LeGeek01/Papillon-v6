@@ -246,8 +246,12 @@ export class IndexDataInstance {
    * 
    * "includeContent" is only available for Pronote: includes
    * or not the resources of the course
+   * 
+   * "includeAllCancelledLesson" only available for Pronote: 
+   * includes all cancelled lesson (lol),
+   * with those replaced
    */
-  public async getTimetable (day: Date, force = false, day2?: Date, includeContent: Boolean = true): Promise<PapillonLesson[]> {
+  public async getTimetable (day: Date, force = false, day2?: Date, includeContent: Boolean = true, includeAllCancelledLesson: boolean = false): Promise<PapillonLesson[]> {
     await this.waitInit();
 
     // JS dates are starting from Sunday, we do `+1` to be on Monday;
@@ -266,7 +270,7 @@ export class IndexDataInstance {
       return this.skolengoInstance!.getTimetable(day, force);
     }
     else if (this.service === 'pronote') {
-      const timetable = await pronoteTimetableHandler([monday, sunday], this.pronoteInstance, force, includeContent);
+      const timetable = await pronoteTimetableHandler([monday, sunday], this.pronoteInstance, force, includeContent, includeAllCancelledLesson);
       if (timetable) return timetable;
     } else if(this.service === 'ecoledirecte') {
       const timetable = await EcoleDirecteTimetable([monday, sunday], this.ecoledirecteInstance, force);

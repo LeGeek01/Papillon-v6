@@ -6,7 +6,7 @@ import { dateToFrenchFormat } from '../../utils/dates';
 import type { CachedPapillonTimetable, PapillonLesson } from '../types/timetable';
 import type { PapillonAttachmentType } from '../types/attachment';
 
-export const timetableHandler = async (interval: [from: Date, to?: Date], instance?: Pronote, force = false, includeContent: Boolean = true): Promise<PapillonLesson[] | null> => {
+export const timetableHandler = async (interval: [from: Date, to?: Date], instance?: Pronote, force = false, includeContent: Boolean = true, includeAllCancelledLesson: boolean = false): Promise<PapillonLesson[] | null> => {
   const from = dateToFrenchFormat(interval[0]);
   const to = interval[1] ? dateToFrenchFormat(interval[1]) : void 0;
 
@@ -28,7 +28,7 @@ export const timetableHandler = async (interval: [from: Date, to?: Date], instan
   try {
     const timetableOverview = await instance.getTimetableOverview(...interval);
     const classes = timetableOverview.parse({
-      withSuperposedCanceledClasses: false,
+      withSuperposedCanceledClasses: includeAllCancelledLesson,
       withCanceledClasses: true,
       withPlannedClasses: true
     });
@@ -121,7 +121,6 @@ export const timetableHandler = async (interval: [from: Date, to?: Date], instan
       interval: { from, to },
       timetable: timetable,
     });
-
     await AsyncStorage.setItem(AsyncStoragePronoteKeys.CACHE_TIMETABLE, JSON.stringify(cachedTimetables));
     return timetable;
   }
