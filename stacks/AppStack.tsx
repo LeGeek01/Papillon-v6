@@ -93,6 +93,14 @@ const AppStack = ({}) => {
       }
     },
     {
+      name: 'RecapScreen',
+      component: require('../views/Cours/RecapScreen').default,
+      options: {
+        headerTitle: "Récapitulatif de l'année",
+        presentation: 'modal' as 'modal',
+      }
+    },
+    {
       name: 'Devoir',
       component: require('../views/Devoirs/HwScreen').default,
       options: {
