@@ -243,32 +243,30 @@ export class IndexDataInstance {
    * 
    * If the user is offline and/or the cache fails, an
    * empty list is returned.
+   * 
+   * "includeContent" is only available for Pronote: includes
+   * or not the resources of the course
    */
-  public async getTimetable (day: Date, force = false, day2?: Date): Promise<PapillonLesson[]> {
+  public async getTimetable (day: Date, force = false, day2?: Date, includeContent: Boolean = true): Promise<PapillonLesson[]> {
     await this.waitInit();
 
     // JS dates are starting from Sunday, we do `+1` to be on Monday;
     let mondayIndex = day.getDate() - day.getDay() + 1;
     let sundayIndex = mondayIndex + 6;
 
-    if(day2) {
-      mondayIndex = day.getDate();
-      sundayIndex = day2.getDate();
-    };
-
     const monday = new Date(day);
     monday.setDate(mondayIndex);
     monday.setHours(0, 0, 0, 0);
     
-    const sunday = new Date(day);
-    sunday.setDate(sundayIndex);
+    const sunday = new Date(day2 ? day2 : day);
+    day2 ? null : sunday.setDate(sundayIndex);
     sunday.setHours(23, 59, 59, 999);
 
     if (this.service === 'skolengo') {
       return this.skolengoInstance!.getTimetable(day, force);
     }
     else if (this.service === 'pronote') {
-      const timetable = await pronoteTimetableHandler([monday, sunday], this.pronoteInstance, force);
+      const timetable = await pronoteTimetableHandler([monday, sunday], this.pronoteInstance, force, includeContent);
       if (timetable) return timetable;
     } else if(this.service === 'ecoledirecte') {
       const timetable = await EcoleDirecteTimetable([monday, sunday], this.ecoledirecteInstance, force);
